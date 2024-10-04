@@ -121,3 +121,60 @@ export const getCarById = async (id: number) => {
 
   return car;
 };
+
+export const updateCar = async (id: number, data: CarInput) => {
+  const { brand, model, year, items } = data;
+
+  const existingCar = await prisma.cars.findUnique({ where: { id } });
+
+  //4. Se o id não for encontrado, deve retornar status 404 com a mensagem “car not found”.
+  if (!existingCar) {
+    const error = new Error("car not found");
+    (error as any).status = 404;
+    throw error;
+  }
+
+  //1. Todos os campos são opcionais, mas as validações de year e items devem seguir as mesmas regras do endpoint de criação.
+  if (year && (year < new Date().getFullYear() - 10 || year > new Date().getFullYear())) {
+    throw new Error("year should be between 2015 and " + new Date().getFullYear());
+  }
+
+  const conflictingCar = await prisma.cars.findFirst({
+    where: {
+        id: { not: id }, 
+        brand,
+        model,
+        year,
+    },
+  });
+
+  //6. Se já existir um carro cadastrado com a mesma marca, modelo e ano deve retornar status 409 com a mensagem “there is already a car with this data”
+  if (conflictingCar) {
+    const error = new Error("there is already a car with this data");
+    (error as any).status = 409;
+    throw error;
+  }
+
+  const updatedData: any = {};
+
+  //2. Se algum campo for enviado com valor vazio ou nulo, deve ser ignorado e não atualizado no banco de dados.
+  if (brand) updatedData.brand = brand;
+  if (model) updatedData.model = model;
+  if (year) updatedData.year = year;
+  if (items) {
+    //3. Quando o campo items for enviado de forma correta, os valores atuais devem substituir os valores antigos.
+    updatedData.items = {
+      deleteMany: {}, 
+      create: [...new Set(items)].map((item) => ({ name: item })), 
+    };
+  }
+
+  await prisma.cars.update({
+    where: { id },
+    data: updatedData,
+  });
+
+
+  return;
+
+};

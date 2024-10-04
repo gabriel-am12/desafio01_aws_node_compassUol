@@ -64,3 +64,19 @@ export const showById = async (req: Request, res: Response): Promise<Response> =
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const update = async (req: Request, res: Response): Promise<Response> => {
+  const id = parseInt(req.params.id);
+  
+  try {
+    //5. Se o carro for atualizado com sucesso deve retornar status 204 sem conteúdo
+    await updateCar(id, req.body);
+    return res.status(204).send();
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      const statusCode = (error as any).status || 400;
+      return res.status(statusCode).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
