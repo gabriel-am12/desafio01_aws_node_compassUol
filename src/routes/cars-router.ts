@@ -5,5 +5,6 @@ const router = Router();
 
 router.route("/cars").post(create); 
 router.route("/cars").get(show);
+router.route("/cars/:id").get(showById);
 
 export default router;

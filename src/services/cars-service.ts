@@ -107,3 +107,17 @@ export const showCars = async (page: number, limit: number, filters: any) => {
     data: cars,
   };
 };
+
+export const getCarById = async (id: number) => {
+  const car = await prisma.cars.findUnique({
+    where: { id },
+    include: { items: true },
+  });
+
+  if (!car) {
+    //2. Caso contrário, deve retornar status 404 com a mensagem “car not found”.
+    throw new Error("car not found");
+  }
+
+  return car;
+};
