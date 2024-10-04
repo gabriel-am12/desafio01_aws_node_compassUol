@@ -49,3 +49,8 @@
 ```bash
   npm run dev
 ```
+## 🔢 Documentação da API
+
+A documentação da API está disponível através do Swagger UI. Quando estiver rodando o projeto, você pode acessá-la em [http://localhost:8000/api-docs](http://localhost:8000/api-docs).
+
+![Swagger UI](assets/swagger_print.png)
