@@ -53,3 +53,57 @@ export const createCar = async (data: CarInput) => {
 
   return car;
 };
+
+export const showCars = async (page: number, limit: number, filters: any) => {
+  const { brand, model, year } = filters;
+  /*
+  3. Deve ter um limite (limit) da lista de carros de no mínimo 1 e no máximo 10.
+  4. Se o limite (limit) não for enviado ou for abaixo de 1, o valor padrão será 
+  5.Se o limite (limit) enviado for maior que 10 deve considerar valor 10.
+  */
+  if (limit < 1) limit = 5; 
+  if (limit > 10) limit = 10; 
+  
+  /*
+  6. Filtros opcionais incluem: brand, model e year.
+    a. brand: Pesquisar por parte do nome da marca
+    b. model: Pesquisar por parte do nome do modelo
+    c. year: Pesquisar por carros com anos a partir do valor enviado
+  */
+  const where: any = {};
+  if (brand) {
+    where.brand = {
+        contains: brand,
+        //mode: 'insensitive', 
+    };
+  }
+
+  if (model) {
+    where.model = {
+        contains: model,
+        //mode: 'insensitive',
+    };
+  }
+
+  if (year) {
+    where.year = {
+      gte: Number(year)
+    }
+  }
+
+  const totalCars = await prisma.cars.count({ where });
+  const cars = await prisma.cars.findMany({
+    where,
+    //2. A listagem deve ser paginada (page: Número da página dos resultados).
+    skip: (page - 1) * limit,
+    take: limit,
+  });
+
+  const totalPages = Math.ceil(totalCars / limit);
+
+  return {
+    count: totalCars,
+    pages: totalPages,
+    data: cars,
+  };
+};

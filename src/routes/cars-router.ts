@@ -4,3 +4,6 @@ import { create, show, showById, update, remove } from "../controllers/cars-cont
 const router = Router();
 
 router.route("/cars").post(create); 
+router.route("/cars").get(show);
+
+export default router;
