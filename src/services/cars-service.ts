@@ -178,3 +178,18 @@ export const updateCar = async (id: number, data: CarInput) => {
   return;
 
 };
+
+export const deleteCar = async (id: number) => {
+  const existingCar = await prisma.cars.findUnique({ where: { id } });
+
+  //2. Se o id não for encontrado, deve retornar status 404 com a mensagem “car not found”.
+  if (!existingCar) {
+    const error = new Error("car not found");
+    (error as any).status = 404;
+    throw error;
+  }
+
+  //3. Os items do carro também devem ser excluídos.
+  await prisma.cars_items.deleteMany({ where: { carId: id } });
+  await prisma.cars.delete({ where: { id } });
+};
